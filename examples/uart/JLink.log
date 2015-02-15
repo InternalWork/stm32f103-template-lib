@@ -1,0 +1,28 @@
+
+T77D90300 000:001 SEGGER J-Link V4.78j Log File (0000ms, 0000ms total)
+T77D90300 000:001 DLL Compiled: Nov 22 2013 20:12:59 (0000ms, 0000ms total)
+T77D90300 000:001 Logging started @ 2014-12-08 21:45 (0001ms, 0001ms total)
+T77D90300 000:002 JLINK_SetWarnOutHandler(...) (0000ms, 0001ms total)
+T77D90300 000:002 JLINK_SelectUSB(Port = 0)  returns 0x00 (0000ms, 0001ms total)
+T77D90300 000:002 JLINK_OpenEx(...)
+Firmware: J-Link ARM V8 compiled Nov 25 2013 19:20:08
+Hardware: V8.00
+S/N: 268003015
+OEM: SEGGER-EDU
+Feature(s): FlashBP, GDB  returns O.K. (0309ms, 0310ms total)
+T77D90300 000:311 JLINK_SetErrorOutHandler(...) (0000ms, 0310ms total)
+T77D90300 000:311 JLINK_EnableLog(...) (0000ms, 0310ms total)
+T77D90300 000:311 JLINK_SetInitRegsOnReset(OFF)  returns 0x01 (0000ms, 0310ms total)
+T77D90300 000:311 JLINK_ExecCommand("device=stm32f103rb", ...)Device "STM32F103RB" selected (128 KB flash, 20 KB RAM).  returns 0x00 (0001ms, 0311ms total)
+T77D90300 000:312 JLINK_GetDLLVersion()  returns 47810 (0000ms, 0311ms total)
+T77D90300 000:312 JLINK_GetCompileDateTime() (0000ms, 0311ms total)
+T77D90300 000:312 JLINK_GetFirmwareString(...) (0000ms, 0311ms total)
+T77D90300 000:312 JLINK_GetHardwareVersion()  returns 0x13880 (0000ms, 0311ms total)
+T77D90300 000:312 JLINK_EMU_HasCapEx(0x00000026)  returns 0x00 (0000ms, 0311ms total)
+T77D90300 000:312 JLINK_EMU_GetProductId() (0000ms, 0311ms total)
+T77D90300 000:312 JLINK_GetHardwareVersion()  returns 0x13880 (0000ms, 0311ms total)
+T77D90300 000:312 JLINK_GetFirmwareString(...) (0000ms, 0311ms total)
+T77D90300 000:312 JLINK_GetEmuCaps()  returns 0xB9FF7BBF (0000ms, 0311ms total)
+T77D90300 000:312 JLINK_GetEmuCaps()  returns 0xB9FF7BBF (0000ms, 0311ms total)
+T77D90300 000:312 JLINK_GetHWStatus(...)  returns 0x00 (0002ms, 0313ms total)
+T77D90300 000:314 JLINK_SetSpeed(100) (0000ms, 0313ms total)

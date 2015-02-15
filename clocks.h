@@ -120,10 +120,7 @@ struct SYSCLK_T {
 			break;
 		}
 
-    /* Wait till PLL is used as system clock source */
-    while ((RCC->CFGR & (uint32_t)RCC_CFGR_SWS) != (uint32_t)0x08)
-    {
-    }
+		while ((RCC->CFGR & RCC_CFGR_SWS) != RCC_CFGR_SWS_1);
 	}
 
 	static void claim(void) { CLOCK_SOURCE::claim(); }

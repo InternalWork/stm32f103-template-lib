@@ -2,6 +2,7 @@
 #define GPIO_H
 
 #include <stm32f10x.h>
+#include <tasks.h>
 
 extern volatile uint32_t EXTI_IRQ_STATE;
 
@@ -111,7 +112,12 @@ struct GPIO_T {
 		return EXTI_IRQ_STATE & bit_value;
 	}
 
+	template<typename TIMEOUT = TIMEOUT_NEVER>
 	static void wait_for_irq(void) {
+		clear_irq();
+		while (!irq_raised() && !TIMEOUT::triggered()) {
+			enter_idle();
+		}
 	}
 
 	static void set_output(void) {

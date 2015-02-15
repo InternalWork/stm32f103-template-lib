@@ -1,0 +1,46 @@
+
+T72E8740 000:000 SEGGER J-Link V4.78k Log File (0000ms, 0000ms total)
+T72E8740 000:000 DLL Compiled: Dec  5 2013 20:31:07 (0000ms, 0000ms total)
+T72E8740 000:000 Logging started @ 2014-12-08 10:20 (0000ms, 0000ms total)
+T72E8740 000:000 JLINK_SetWarnOutHandler(...) (0000ms, 0000ms total)
+T72E8740 000:000 JLINK_SelectUSB(Port = 0)  returns 0x00 (0000ms, 0000ms total)
+T72E8740 000:000 JLINK_OpenEx(...)
+Firmware: J-Link ARM V8 compiled Nov 25 2013 19:20:08
+Hardware: V8.00
+S/N: 268003015
+OEM: SEGGER-EDU
+Feature(s): FlashBP, GDB  returns O.K. (0282ms, 0282ms total)
+T72E8740 000:282 JLINK_SetErrorOutHandler(...) (0000ms, 0282ms total)
+T72E8740 000:282 JLINK_EnableLog(...) (0000ms, 0282ms total)
+T72E8740 000:282 JLINK_SetInitRegsOnReset(OFF)  returns 0x01 (0000ms, 0282ms total)
+T72E8740 000:282 JLINK_ExecCommand("device=stm32f103rb", ...)Device "STM32F103RB" selected (128 KB flash, 20 KB RAM).  returns 0x00 (0000ms, 0282ms total)
+T72E8740 000:282 JLINK_GetDLLVersion()  returns 47811 (0000ms, 0282ms total)
+T72E8740 000:282 JLINK_GetCompileDateTime() (0000ms, 0282ms total)
+T72E8740 000:282 JLINK_GetFirmwareString(...) (0000ms, 0282ms total)
+T72E8740 000:282 JLINK_GetHardwareVersion()  returns 0x13880 (0000ms, 0282ms total)
+T72E8740 000:282 JLINK_EMU_HasCapEx(0x00000026)  returns 0x00 (0000ms, 0282ms total)
+T72E8740 000:283 JLINK_EMU_GetProductId() (0000ms, 0283ms total)
+T72E8740 000:283 JLINK_GetHardwareVersion()  returns 0x13880 (0000ms, 0283ms total)
+T72E8740 000:283 JLINK_GetFirmwareString(...) (0000ms, 0283ms total)
+T72E8740 000:283 JLINK_GetEmuCaps()  returns 0xB9FF7BBF (0000ms, 0283ms total)
+T72E8740 000:283 JLINK_GetEmuCaps()  returns 0xB9FF7BBF (0000ms, 0283ms total)
+T72E8740 000:283 JLINK_GetHWStatus(...)  returns 0x00 (0000ms, 0283ms total)
+T72E8740 000:283 JLINK_SetSpeed(100) (0000ms, 0283ms total)
+T72E8740 010:023 JLINK_Halt() >0x2F8 JTAG>TotalIRLen = 9, IRPrint = 0x0011 >0x30 JTAG> >0x210 JTAG> >0x40 JTAG> >0x40 JTAG> >0x40 JTAG> >0x30 JTAG> >0x40 JTAG> >0x40 JTAG> >0x40 JTAG> >0x40 JTAG> >0x40 JTAG> >0x40 JTAG> >0x40 JTAG> >0x40 JTAG> >0x40 JTAG> >0x40 JTAG> >0x2F8 JTAG>TotalIRLen = 9, IRPrint = 0x0011 >0x30 JTAG> >0x210 JTAG> >0x70 JTAG> >0x40 JTAG> >0x40 JTAG> >0x40 JTAG> >0x50 JTAG> >0x80 JTAG> >0x40 JTAG> >0x30 JTAG> >0x40 JTAG> >0x40 JTAG> >0x30 JTAG> >0x40 JTAG> >0x50 JTAG>
+Found Cortex-M3 r1p1, Little endian. -- CPU_WriteMem(4 bytes @ 0xE0002000) -- CPU_ReadMem(4 bytes @ 0xE000EDF0) -- CPU_WriteMem(4 bytes @ 0xE000EDF0) -- CPU_ReadMem(4 bytes @ 0xE0002000)FPUnit: 6 code (BP) slots and 2 literal slots -- CPU_ReadMem(4 bytes @ 0xE000EDFC) -- CPU_WriteMem(4 bytes @ 0xE000EDFC) -- CPU_ReadMem(4 bytes @ 0xE0001000) -- CPU_WriteMem(4 bytes @ 0xE0001000) -- CPU_ReadMem(4 bytes @ 0xE00FF010)TPIU fitted. -- CPU_ReadMem(4 bytes @ 0xE00FF014) -- CPU_ReadMem(4 bytes @ 0xE00FF018)
+  returns 0x00 (0167ms, 0450ms total)
+T72E8740 010:190 JLINK_GetDeviceFamily()  returns 3 (0000ms, 0450ms total)
+T72E8740 010:190 JLINK_ReadRegs(NumRegs = 28, Indexes: 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 17, 18, 14, 15, 16, 21, 22, 23, 20, 27, 26, 25, 24, 65) -- CPU_ReadMem(4 bytes @ 0xE0001004)
+ -- R0=0x00, R1=0x20000000, R2=0x20000000, R3=0x20000000, R4=0xFFFFFFFF, R5=0xFFDFDE7B, R6=0x149AA8EB, R7=0xF06E1C03, R8=0xFBFF3BDE, R9=0xFFF7FFDF, R10=0x703F163F, R11=0xC1AD2CD6, R12=0x9FFEFBFF, R13 (SP)=0x20005000, MSP=0x20005000, PSP=0x90073970, R14=0x800013F, R15 (PC)=0x800013E, XPSR=0x61000000, APSR=0x60000000, EPSR=0x1000000, IPSR=0x00, CFBP=0x00, CONTROL=0x00, FAULTMASK=0x00, BASEPRI=0x00, PRIMASK=0x00, CycleCnt=0x23E5B  returns 0x00 (0005ms, 0455ms total)
+T72E8740 035:870 JLINK_IsHalted()  returns TRUE (0003ms, 0458ms total)
+T72E8740 035:874 JLINK_BeginDownload(Flags = 0x00) (0000ms, 0455ms total)
+T72E8740 035:874 JLINK_WriteMem(0x00000000, 0x01A8 Bytes, ...) -- Data:  00 50 00 20 69 01 00 08 67 01 00 08 65 01 00 08 ... -- CPU_ReadMem(4 bytes @ 0x00000004)  returns 0x1A8 (0005ms, 0460ms total)
+T72E8740 035:879 JLINK_EndDownload() -- -------------------------------------- -- Start of determining dirty areas -- End of determining dirty areas -- Start of preparing flash programming -- Calculating RAM usage -- RAM usage = 2476 Bytes -- Preserving registers -- Preparing memory -- Determining CPU clock frequency -- CPU clock frequency: 8043 kHz -- CPU frequency = 8043 kHz -- Preparing target -- Downloading RAMCode -- Using alternate TurboMode RAMCode -- Checking target RAM -- Preparing RAMCode
+ -- End of preparing flash programmingCPU is running at low speed (8043 kHz). -- CPU is running at 8043 kHz. -- Start of comparing flash -- CRC check was estimated as fastest method -- Comparing range 0x8000000 - 0x80003FF (1 Sector, 1024 Bytes), using multi-block CRC calculation -- CRC does not match for sector 0 -- End of comparing flash -- Start of erasing sectors -- Erasing range 0x08000000 - 0x080003FF (  1 Sector, 1024 Bytes) -- End of erasing sectors -- Start of flash programming
+ -- Programming range 0x08000000 - 0x080003FF (  1 Sector, 1024 Bytes) -- End of flash programming -- Flash programming performed for 1 range (1024 bytes) -- 0x8000000 - 0x80003FF (001 Sector, 1024 Bytes) -- Start of verifying flash -- Checksum calculation was estimated as fastest method -- End of verifying flash -- Start of restoring -- Restore RAMCode -- Restore content of target memory -- Restore target -- Restore memory -- Restore content of registers -- End of restoring
+ -- Total time needed: 0.884s (Prepare: 0.661s, Compare: 0.012s, Erase: 0.058s, Program: 0.065s, Verify: 0.006s, Restore: 0.080s)  returns 0x400 (0884ms, 1344ms total)
+T72E8740 039:540 JLINK_GoEx(MaxEmulInsts = 0, Flags = 0x01) (0021ms, 1365ms total)
+T72E8740 044:254 JLINK_Halt()  returns 0x00 (0061ms, 1427ms total)
+T72E8740 044:315 JLINK_GetDeviceFamily()  returns 3 (0000ms, 1427ms total)
+T72E8740 044:315 JLINK_ReadRegs(NumRegs = 28, Indexes: 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 17, 18, 14, 15, 16, 21, 22, 23, 20, 27, 26, 25, 24, 65) -- CPU_ReadMem(4 bytes @ 0xE0001004)
+ -- R0=0x00, R1=0x20000000, R2=0xE7F9F98F, R3=0x1F001F41, R4=0xFFFFFFFF, R5=0xFFDFDE7B, R6=0x149AA8EB, R7=0xF06E1C03, R8=0xFBFF3BDE, R9=0xFFF7FFDF, R10=0x703F163F, R11=0xC1AD2CD6, R12=0x9FFEFBFF, R13 (SP)=0x20005000, MSP=0x20005000, PSP=0x90073970, R14=0x800013F, R15 (PC)=0x8000148, XPSR=0xA1000000, APSR=0xA0000000, EPSR=0x1000000, IPSR=0x00, CFBP=0x00, CONTROL=0x00, FAULTMASK=0x00, BASEPRI=0x00, PRIMASK=0x00, CycleCnt=0x25B6DBF  returns 0x00 (0005ms, 1432ms total)
