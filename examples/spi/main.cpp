@@ -4,7 +4,9 @@
 #include <spi.h>
 #include <pwr.h>
 
-typedef SYSCLK_T<> SYSCLK;
+typedef HSE_OSC_T<12000000> HSE;
+typedef PLL_T<HSE, 72000000> PLL;
+typedef SYSCLK_T<PLL> SYSCLK;
 typedef SYSTICK_T<SYSCLK> SYSTICK;
 typedef PWR_T<> POWER;
 
@@ -48,6 +50,8 @@ void SPI1_IRQHandler(void)
 
 int main(void)
 {
+	HSE::init();
+	PLL::init();
 	SYSCLK::init();
 	POWER::init();
 	PORT_A::init();

@@ -178,6 +178,7 @@ struct PIN_UNUSED {
 	static void set_high(void) { }
 	static void set_low(void) { }
 	static void clear_irq(void) { }
+	static void wait_for_irq(void) { }
 	static constexpr bool irq_raised(void) { return false; }
 };
 

@@ -16,6 +16,11 @@ void hex_dump(DATA *start, int count, const char *title = 0)
 	}
 }
 
+void memcpy(void *dst, const void *src, int len);
+void memset(void *dst, uint8_t c, int len);
+int strcmp(const char *s1, const char *s2);
+int strncmp(const char *s1, const char *s2, int n);
+
 #define ARRAY_COUNT(a) (sizeof(a) / sizeof(a[0]))
 #define ABS_DIFF(a, b) (a > b ? a - b : b - a)
 #define hex_dump_periph(OUTPUT, PERIPH) hex_dump<OUTPUT, uint32_t>((uint32_t *) PERIPH, sizeof(*PERIPH), #PERIPH)

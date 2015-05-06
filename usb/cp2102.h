@@ -109,6 +109,10 @@ struct CP2102_UART_T {
 		}
 	}
 
+	static bool eof(void) {
+		return RX_BUFFER::is_empty();
+	}
+
 	template<typename TIMEOUT = TIMEOUT_NEVER>
 	static void putc(char data) {
 		TX_BUFFER::write(data);
@@ -126,7 +130,7 @@ struct CP2102_UART_T {
 
 	template<typename TIMEOUT = TIMEOUT_NEVER>
 	static char getc() {
-		if (!RX_BUFFER::is_empty()) {
+		if (!eof()) {
 			return RX_BUFFER::read();
 		}
 	}
@@ -136,10 +140,10 @@ struct CP2102_UART_T {
 		static int n = 0;
 		char c = -1;
 		char *r = 0;
-		while (!TIMEOUT::triggered() && RX_BUFFER::is_empty()) {
+		while (!TIMEOUT::triggered() && eof()) {
 			enter_idle();
 		}
-		while (!RX_BUFFER::is_empty() && n < size - 1 && c != '\n') {
+		while (!eof() && n < size - 1 && c != '\n') {
 			c = RX_BUFFER::read();
 			buffer[n++] = c;
 		}

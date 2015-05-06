@@ -22,6 +22,7 @@ COMMON_SRCS = ../../vectors.cpp ../../utils.cpp
 %.elf : %.cpp
 	$(CXX) -o $@ $(CXXFLAGS) $($*_FLAGS) $(COMMON_SRCS) $<
 	$(OBJDUMP) -S $@ > $*.lst
+	$(OBJCOPY) -O binary $@ $*.bin
 	$(SIZE) $@
 
 clean:
