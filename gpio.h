@@ -113,11 +113,11 @@ struct GPIO_T {
 	}
 
 	template<typename TIMEOUT = TIMEOUT_NEVER>
-	static void wait_for_irq(void) {
-		clear_irq();
+	static bool wait_for_irq(void) {
 		while (!irq_raised() && !TIMEOUT::triggered()) {
 			enter_idle();
 		}
+		return irq_raised();
 	}
 
 	static void set_output(void) {
