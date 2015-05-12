@@ -36,8 +36,6 @@ static constexpr IRQn_Type nvic_spi_irqn[] = {
 #endif
 };
 
-extern "C" void HardFault_Handler(void);
-
 template<const SPI_INSTANCE SPI_N,
 	typename CLOCK,
 	const bool MASTER = true,
@@ -115,8 +113,10 @@ struct SPI_T {
 		rx_buffer = rx_data;
 		rx_count = count;
 		enable_irq();
-		while (!TIMEOUT::triggered() && rx_count > 0) {
-			enter_idle();
+		if (rx_count > 0) {
+			while (!TIMEOUT::triggered() && rx_count > 0) {
+				enter_idle();
+			}
 		}
 		disable_irq();
 	}
