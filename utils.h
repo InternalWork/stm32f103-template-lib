@@ -4,15 +4,17 @@
 #include <io.h>
 
 template<typename OUTPUT, typename DATA>
-void hex_dump(DATA *start, int count, const char *title = 0)
+void hex_dump(DATA *start, int count, const char *title = 0, bool relative = false)
 {
+	DATA *n = 0;
 	if (title) printf<OUTPUT>("%s:\n", title);
 	while (count > 0) {
 		printf<OUTPUT>(sizeof(DATA) == 1 ? "%04x: %02x %02x %02x %02x\n" :
 			      (sizeof(DATA) == 2 ? "%04x: %04x %04x %04x %04x\n" : "%08x: %08x %08x %08x %08x\n"),
-			       start, start[0], start[1], start[2], start[3]);
+			       relative ? n : start, start[0], start[1], start[2], start[3]);
 		start += sizeof(DATA) * 4;
 		count -= sizeof(DATA) * 4;
+		n += sizeof(DATA) * 4;
 	}
 }
 
