@@ -4,11 +4,10 @@
 #include <spi.h>
 #include <pwr.h>
 
-typedef HSE_OSC_T<12000000> HSE;
+typedef HSE_OSC_T<> HSE;
 typedef PLL_T<HSE, 72000000> PLL;
 typedef SYSCLK_T<PLL> SYSCLK;
 typedef SYSTICK_T<SYSCLK> SYSTICK;
-typedef PWR_T<> POWER;
 
 typedef GPIO_T<PA, 3, OUTPUT_10MHZ, PUSH_PULL> D0;
 typedef GPIO_T<PA, 2, OUTPUT_10MHZ, PUSH_PULL> D1;
@@ -36,15 +35,15 @@ typedef SPI_T<SPI_1, SYSCLK, true, 0> SPI;
 
 extern "C" {
 
-void USART1_IRQHandler(void)
-{
-	if (UART::handle_irq()) exit_idle();
-}
+	void USART1_IRQHandler(void)
+	{
+		if (UART::handle_irq()) exit_idle();
+	}
 
-void SPI1_IRQHandler(void)
-{
-	if (SPI::handle_irq()) exit_idle();
-}
+	void SPI1_IRQHandler(void)
+	{
+		if (SPI::handle_irq()) exit_idle();
+	}
 
 }
 
@@ -53,17 +52,19 @@ int main(void)
 	HSE::init();
 	PLL::init();
 	SYSCLK::init();
-	POWER::init();
 	PORT_A::init();
 	PORT_B::init();
 	PORT_C::init();
 	UART::init();
 	UART::puts("SPI test start\n");
 	SPI::init();
-	CSN::set_low();
-	SPI::transfer(0x44);
-	SPI::transfer((uint8_t *) "\x55\xaa\x12\x34", 4);
-	CSN::set_high();
-	POWER::sleep();
+	while (1) {
+		UART::puts("Transfer...\n");
+		CSN::set_low();
+		SPI::transfer(0x44);
+		SPI::transfer((uint8_t *) "\x55\xaa\x12\x34", 4);
+		CSN::set_high();
+		SYSTICK::set_and_wait(500);
+	}
 	return 0;
 }
