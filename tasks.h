@@ -67,7 +67,7 @@ struct TIMEOUT_T {
 	static volatile uint32_t timeout;
 
 	static void set(const uint32_t milliseconds) {
-		timeout = ((uint32_t) milliseconds * (uint32_t) CLOCK::frequency / (uint32_t) 1000);
+		timeout = milliseconds * CLOCK::frequency / 1000;
 		CLOCK::claim();
 	};
 

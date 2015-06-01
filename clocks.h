@@ -137,25 +137,9 @@ struct SYSCLK_T {
 	static void release(void) { CLOCK_SOURCE::release(); }
 };
 
-template<typename SYSCLK>
-struct SYSTICK_T {
-	static void set_and_wait_us(uint32_t microseconds) {
-		SysTick->LOAD = microseconds * (SYSCLK::frequency / 1000000);
-		SysTick->CTRL = SysTick_CTRL_CLKSOURCE_Msk | SysTick_CTRL_ENABLE_Msk;
-		while (!(SysTick->CTRL & SysTick_CTRL_COUNTFLAG_Msk));
-		SysTick->CTRL = 0;
-	}
-
-	static void set_and_wait(uint32_t milliseconds) {
-		while (milliseconds--) {
-			set_and_wait_us(1000);
-		}
-	}
-};
-
 void enter_idle(void)
 {
-	//SCB->SCR |= SCB_SCR_SLEEPONEXIT_Msk;
+	SCB->SCR |= SCB_SCR_SLEEPONEXIT_Msk;
 	__WFI();
 }
 
@@ -163,5 +147,57 @@ void exit_idle(void)
 {
 	SCB->SCR &= ~SCB_SCR_SLEEPONEXIT_Msk;
 }
+
+template<typename SYSCLK, const uint32_t FREQUENCY = 1000>
+struct SYSTICK_T {
+	static constexpr uint32_t frequency = FREQUENCY;
+	static constexpr uint32_t reload = SYSCLK::frequency / FREQUENCY;
+	static int8_t users;
+
+	static void claim(void) {
+		enable_irq();
+		users++;
+	}
+
+	static void release(void) {
+		users--;
+		if (users == 0) disable_irq();
+	}
+
+	static void init(void) {
+		SysTick->LOAD = reload;
+		SysTick->CTRL = SysTick_CTRL_CLKSOURCE_Msk | SysTick_CTRL_ENABLE_Msk;
+	}
+
+	static void enable_irq(void) {
+		SysTick->CTRL |= SysTick_CTRL_TICKINT_Msk;
+	}
+
+	static void disable_irq(void) {
+		SysTick->CTRL &= ~SysTick_CTRL_TICKINT_Msk;
+	}
+
+	static void set_and_wait_us(uint32_t microseconds) {
+		uint32_t delta = microseconds * reload / FREQUENCY;
+		uint32_t then;
+		if (delta + 100 < SysTick->VAL) {
+			then = SysTick->VAL - delta;
+		} else {
+			then = reload + SysTick->VAL - delta;
+			while (!(SysTick->CTRL & SysTick_CTRL_COUNTFLAG_Msk));
+		}
+		while (SysTick->VAL > then);
+	}
+
+	static void set_and_wait(uint32_t milliseconds) {
+		milliseconds = milliseconds * FREQUENCY / 1000;
+		while (milliseconds--) {
+			while (!(SysTick->CTRL & SysTick_CTRL_COUNTFLAG_Msk));
+		}
+	}
+};
+
+template<typename SYSCLK, const uint32_t FREQUENCY>
+int8_t SYSTICK_T<SYSCLK, FREQUENCY>::users = 0;
 
 #endif
