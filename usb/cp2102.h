@@ -1,6 +1,9 @@
 #ifndef USB_CP2102_H
 #define USB_CP2102_H
 
+#include <swo.h>
+#include <io.h>
+
 namespace USB {
 
 template<typename PLL,
@@ -9,6 +12,7 @@ template<typename PLL,
 	typename RX_BUFFER>
 struct CP2102_UART_T {
 	volatile static bool initialized;
+	volatile static uint8_t handshaking_state;
 
 	static constexpr uint8_t device_descriptor[18] = {
 		0x12, 0x01, 0x10, 0x01, 0x00, 0x00, 0x00, 0x40, 0xC4, 0x10, 0x60, 0xEA, 0x00, 0x01, 0x01, 0x02,
@@ -68,13 +72,13 @@ struct CP2102_UART_T {
 		} else {
 			switch (packet->bRequest) {
 			case 0x00: if (packet->wValue) initialized = true; *length = 0; break;
-			case 0x08: *response_data = (const uint8_t *) "\x33"; *length = 1; break;
+			case 0x07: handshaking_state = handshaking_state & ~(packet->wValue >> 8) | (packet->wValue & 0x3); *length = 0; break;
+			case 0x08: *response_data = (const uint8_t *) &handshaking_state; *length = 1; break;
 			case 0x10: *response_data = (const uint8_t *) "\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00"; *length = 19; break;
 			case 0xff: *response_data = (const uint8_t *) "\x02"; *length = 1; break;
 			case 0x0f: *response_data = (const uint8_t *) "\x42\x00\x00\x01\x01\x00\x00\x00\x00\x00\x00\x00\x00\x02\x00\x00\x00\x02\x00\x00\xC0\xC6\x2D\x00\x01\x00\x00\x00\x3F\x01\x00\x00\x7F\x00\x00\x00\xF0\xFF\x07\x10\x0F\x00\x07\x1F\x00\x02\x00\x00\x00\x02\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x33\x00\x2E\x00"; *length = 64; break;
 			case 0x03:
 			case 0x05:
-			case 0x07:
 			case 0x13:
 			case 0x19:
 			case 0x1e: *length = 0; break;
@@ -89,18 +93,21 @@ struct CP2102_UART_T {
 
 	static void init(void) {
 		USB_DRIVER::init();
+		handshaking_state = 0x30;
 	}
 
 	static bool enabled(void) {
 		return true;
 	}
 
-	static void handle_lp_irq(void) {
+	static bool handle_lp_irq(void) {
 		USB_DRIVER::handle_lp_irq();
+		return !eof();
 	}
 
-	static void handle_hp_irq(void) {
+	static bool handle_hp_irq(void) {
 		USB_DRIVER::handle_hp_irq();
+		return !eof();
 	}
 
 	static void tx_start(void) {
@@ -111,6 +118,22 @@ struct CP2102_UART_T {
 
 	static bool eof(void) {
 		return RX_BUFFER::is_empty();
+	}
+
+	static bool dtr(void) {
+		return handshaking_state & 0x01;
+	}
+
+	static bool rts(void) {
+		return handshaking_state & 0x02;
+	}
+
+	static void set_cts(bool b) {
+		handshaking_state = handshaking_state & ~(0x10) | (b ? 0x10 : 0);
+	}
+
+	static void set_dsr(bool b) {
+		handshaking_state = handshaking_state & ~(0x20) | (b ? 0x20 : 0);
 	}
 
 	template<typename TIMEOUT = TIMEOUT_NEVER>
@@ -159,6 +182,9 @@ struct CP2102_UART_T {
 
 template<typename PLL, typename DISCONNECT_PIN, typename TX_BUFFER, typename RX_BUFFER>
 volatile bool CP2102_UART_T<PLL, DISCONNECT_PIN, TX_BUFFER, RX_BUFFER>::initialized;
+
+template<typename PLL, typename DISCONNECT_PIN, typename TX_BUFFER, typename RX_BUFFER>
+volatile uint8_t CP2102_UART_T<PLL, DISCONNECT_PIN, TX_BUFFER, RX_BUFFER>::handshaking_state;
 
 template<typename PLL, typename DISCONNECT_PIN, typename TX_BUFFER, typename RX_BUFFER>
 constexpr uint8_t CP2102_UART_T<PLL, DISCONNECT_PIN, TX_BUFFER, RX_BUFFER>::device_descriptor[18];

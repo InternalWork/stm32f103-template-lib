@@ -133,6 +133,7 @@ struct EP0_HANDLER_T {
 	static uint16_t pending_length;
 	static uint16_t setup_request_length;
 	static uint8_t setup_set_address;
+	static uint8_t active_configuration;
 
 	static uint16_t init(uint16_t btable_offset) {
 		return EP::init(btable_offset);
@@ -190,7 +191,10 @@ struct EP0_HANDLER_T {
 		switch (packet->bRequest) {
 		case SET_ADDRESS: set_address(); break;
 		case GET_DESCRIPTOR: get_descriptor(); break;
-		case SET_CONFIGURATION: send_zero_length_data(); break;
+		case SET_CONFIGURATION:
+			active_configuration = packet->wValue;
+			send_zero_length_data();
+			break;
 		default:
 			if (packet->bmRequestType & REQUEST_TYPE == STANDARD_REQUEST) {
 				send_zero_length_data();
@@ -255,6 +259,9 @@ uint16_t EP0_HANDLER_T<GET_DESCRIPTOR, HANDLE_SETUP_REQUEST>::setup_request_leng
 
 template<DESCRIPTOR_CALLBACK GET_DESCRIPTOR, SETUP_CALLBACK HANDLE_SETUP_REQUEST>
 uint8_t EP0_HANDLER_T<GET_DESCRIPTOR, HANDLE_SETUP_REQUEST>::setup_set_address;
+
+template<DESCRIPTOR_CALLBACK GET_DESCRIPTOR, SETUP_CALLBACK HANDLE_SETUP_REQUEST>
+uint8_t EP0_HANDLER_T<GET_DESCRIPTOR, HANDLE_SETUP_REQUEST>::active_configuration;
 
 template<const uint8_t NUMBER,
 	const EP_TYPE TYPE,
