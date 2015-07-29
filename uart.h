@@ -3,6 +3,7 @@
 
 #include <stm32f10x.h>
 #include <tasks.h>
+#include <utils.h>
 
 enum USART_INSTANCE {
 	USART_1 = 0,
