@@ -125,7 +125,7 @@ struct SYSCLK_T {
 		case LSE_CLOCK_SOURCE:
 			break;
 		case PLL_CLOCK_SOURCE:
-			RCC->CFGR &= RCC_CFGR_SW;
+			RCC->CFGR &= ~RCC_CFGR_SW;
 			RCC->CFGR |= RCC_CFGR_SW_PLL;
 			while ((RCC->CFGR & RCC_CFGR_SWS) != RCC_CFGR_SWS_1);
 			break;
@@ -140,12 +140,13 @@ struct SYSCLK_T {
 void enter_idle(void)
 {
 	SCB->SCR |= SCB_SCR_SLEEPONEXIT_Msk;
-	__WFI();
+	__WFE();
 }
 
 void exit_idle(void)
 {
 	SCB->SCR &= ~SCB_SCR_SLEEPONEXIT_Msk;
+	__SEV();
 }
 
 template<typename SYSCLK, const uint32_t FREQUENCY = 1000>
