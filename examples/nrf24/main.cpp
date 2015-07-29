@@ -145,7 +145,7 @@ int main(void)
 		if (n++ == 10) {
 			NRF24::read_regs(regs);
 			UART::puts("------------------\n");
-			hex_dump_bytes<UART>(regs, sizeof(regs));
+			hex_dump<UART, uint8_t>(regs, sizeof(regs));
 			n = 0;
 		}
 	}
@@ -176,7 +176,7 @@ int main(void)
 		TIMEOUT::disable();
 		UART::enable();
 		UART::puts("------------------\n");
-		hex_dump_bytes<UART>(packet, n);
+		hex_dump<UART, uint8_t>(packet, n);
 	}
 #endif
 }

@@ -16,8 +16,7 @@ CXXFLAGS = $(CFLAGS) -std=c++11 -fno-unwind-tables -fno-exceptions
 LDFLAGS = -nostdlib --gc-sections -L../.. -L../../../libaeabi-cortexm0 -T../../stm32f103xb.ld
 LIBS = -laeabi-cortexm0
 
-CPP_SRCS = main.cpp
-C_SRCS = ../../vectors.c ../../utils.c
+CPP_SRCS = ../../utils.cpp ../../vectors.cpp main.cpp
 
 OBJS = $(CPP_SRCS:.cpp=.o) $(C_SRCS:.c=.o) $(ARM_SRCS:.s=.o)
 INTERMEDIATES = $(PRG).lst $(PRG).bin $(PRG).elf

@@ -115,9 +115,9 @@ struct SYSCLK_T {
 			FLASH->ACR |= FLASH_ACR_LATENCY_1;
 		}
 		RCC->CFGR |= RCC_CFGR_HPRE_DIV1 | RCC_CFGR_PPRE2_DIV1 | RCC_CFGR_PPRE1_DIV2;
-		static_assert(AHB_PRESCALER == 1, "AHB prescaler settting not implemented");
-		static_assert(APB1_PRESCALER == 2, "APB1 prescaler settting not implemented");
-		static_assert(APB2_PRESCALER == 1, "APB2 prescaler settting not implemented");
+		static_assert(AHB_PRESCALER == 1, "AHB prescaler setting not implemented");
+		static_assert(APB1_PRESCALER == 2, "APB1 prescaler setting not implemented");
+		static_assert(APB2_PRESCALER == 1, "APB2 prescaler setting not implemented");
 		switch (CLOCK_SOURCE::clock_source) {
 		case HSI_CLOCK_SOURCE:
 		case HSE_CLOCK_SOURCE:
