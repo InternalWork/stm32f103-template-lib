@@ -113,10 +113,8 @@ struct SPI_T {
 		rx_buffer = rx_data;
 		rx_count = count;
 		enable_irq();
-		if (rx_count > 0) {
-			while (!TIMEOUT::triggered() && rx_count > 0) {
-				enter_idle();
-			}
+		while (!TIMEOUT::triggered() && rx_count > 0) {
+			enter_idle();
 		}
 		disable_irq();
 	}
@@ -133,7 +131,8 @@ struct SPI_T {
 					rx_buffer++;
 				}
 				rx_count--;
-			} else {
+			}
+			if (rx_count == 0) {
 				spi->CR2 &= ~SPI_CR2_RXNEIE;
 				resume = true;
 			}
