@@ -131,6 +131,10 @@ SECTIONS
 
     .peripheral (COPY):
     {
+         . = 0x5400;
+         *(.i2c1_peripheral*)
+         . = 0x5800;
+         *(.i2c2_peripheral*)
          . = 0x5C00;
          *(.usb_peripheral*)
          . = 0x6000;

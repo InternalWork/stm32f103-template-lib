@@ -18,7 +18,7 @@ typedef GPIO_T<PC, 9, INPUT, FLOATING, LOW, INTERRUPT_ENABLED, EDGE_FALLING> BUT
 typedef GPIO_PORT_T<PB, LED1, LED2, SCL, SDA> PORT_B;
 typedef GPIO_PORT_T<PB, LED1, LED2, SCL_RESET, SDA_RESET> PORT_B_I2C_RESET;
 
-typedef I2C_T<SYSCLK, 1> I2C;
+typedef I2C::T<SYSCLK, 1> I2C_DEV;
 
 uint8_t chip_id;
 uint8_t ctrl_meas;
@@ -39,14 +39,14 @@ int main(void)
 	PORT_B::init();
 
 	LED1::set_high();
-	I2C::init();
-	I2C::set_slave_addr(0x5e);
+	I2C_DEV::init();
+	I2C_DEV::set_slave_addr(0x5e);
 	LED2::set_high();
 	while (1) {
-//		I2C::write_reg(0x51, 0xc0);
-		chip_id = I2C::read_reg(0x51);
-//		ctrl_meas = I2C::read_reg(0xf4);
-//		I2C::read_reg(0xf6, out, sizeof(out));
+//		I2C_DEV::write_reg(0x51, 0xc0);
+		I2C_DEV::read_reg(0x51, chip_id);
+//		ctrl_meas = I2C_DEV::read_reg(0xf4);
+//		I2C_DEV::read_reg(0xf6, out, sizeof(out));
 //		SYSTICK::set_and_wait(500);
 	}
 	return 0;
