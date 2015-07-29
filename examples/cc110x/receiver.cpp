@@ -8,6 +8,7 @@ int main(void)
 {
 	HSE::init();
 	PLL::init();
+	SYSTICK::init();
 	SYSCLK::init();
 	POWER::init();
 	PORT_A::init();

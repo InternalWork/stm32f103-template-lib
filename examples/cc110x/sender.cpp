@@ -19,6 +19,7 @@ int main(void)
 	//HSE::init();
 	//PLL::init();
 	SYSCLK::init();
+	SYSTICK::init();
 	PORT_A::init();
 	PORT_B::init();
 	LED_GREEN::set_high();
