@@ -8,11 +8,11 @@
 
 namespace USB {
 
-typedef void(*IRQ_CALLBACK)(void);
-typedef void(*HANDLER_FUNCTION)(uint8_t ep, bool out);
+typedef bool(*IRQ_CALLBACK)(void);
+typedef bool(*HANDLER_FUNCTION)(uint8_t ep, bool out);
 
-static void default_irq_callback(void) { }
-static void invalid_ep_ctr(uint8_t ep, bool out) {
+static bool default_irq_callback(void) { return true; }
+static bool invalid_ep_ctr(uint8_t ep, bool out) {
 	while (1);
 }
 
@@ -78,12 +78,13 @@ struct T {
 		NVIC_DisableIRQ(USBWakeUp_IRQn);
 	}
 
-	static void handle_lp_irq(void) {
+	static bool handle_lp_irq(void) {
+		bool exit_idle = false;
 		if (irq_callback != default_irq_callback) {
-			irq_callback();
+			exit_idle = irq_callback();
 		}
 		if (USB->ISTR & USB_ISTR_CTR) {
-			ctr();
+			exit_idle = ctr();
 			USB->ISTR &= ~USB_ISTR_CTR;
 		}
 		if (USB->ISTR & USB_ISTR_RESET) {
@@ -98,13 +99,16 @@ struct T {
 			wake();
 			USB->ISTR &= ~USB_ISTR_WKUP;
 		}
+		return exit_idle;
 	}
 
-	static void handle_hp_irq(void) {
+	static bool handle_hp_irq(void) {
+		bool exit_idle = false;
 		if (USB->ISTR & USB_ISTR_CTR) {
-			ctr();
+			exit_idle = ctr();
 			USB->ISTR &= ~USB_ISTR_CTR;
 		}
+		return exit_idle;
 	}
 
 	static void reset(void) {
@@ -129,10 +133,10 @@ struct T {
 		USB->CNTR = USB_CNTR_CTRM | USB_CNTR_WKUPM | USB_CNTR_SUSPM | USB_CNTR_RESETM;
 	}
 
-	static void ctr(void) {
+	static bool ctr(void) {
 		uint8_t ep = USB->ISTR & USB_ISTR_EP_ID;
 		bool out = USB->ISTR & USB_ISTR_DIR;
-		ep_handler[ep](ep, out);
+		return ep_handler[ep](ep, out);
 	}
 
 	static void enable(void) {

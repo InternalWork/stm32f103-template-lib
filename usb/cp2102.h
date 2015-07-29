@@ -101,13 +101,11 @@ struct CP2102_UART_T {
 	}
 
 	static bool handle_lp_irq(void) {
-		USB_DRIVER::handle_lp_irq();
-		return !eof();
+		return USB_DRIVER::handle_lp_irq();
 	}
 
 	static bool handle_hp_irq(void) {
-		USB_DRIVER::handle_hp_irq();
-		return !eof();
+		return USB_DRIVER::handle_hp_irq();
 	}
 
 	static void tx_start(void) {
@@ -153,6 +151,9 @@ struct CP2102_UART_T {
 
 	template<typename TIMEOUT = TIMEOUT_NEVER>
 	static char getc() {
+		while (!TIMEOUT::triggered() && eof()) {
+			enter_idle();
+		}
 		if (!eof()) {
 			return RX_BUFFER::read();
 		}
@@ -163,14 +164,22 @@ struct CP2102_UART_T {
 		static int n = 0;
 		char c = -1;
 		char *r = 0;
-		while (!TIMEOUT::triggered() && eof()) {
-			enter_idle();
-		}
-		while (!eof() && n < size - 1 && c != '\n') {
-			c = RX_BUFFER::read();
-			buffer[n++] = c;
-		}
-		if (n == size - 1 || c == '\n') {
+		bool eol = false;
+		do {
+			while (!TIMEOUT::triggered() && eof()) {
+				enter_idle();
+			}
+			if (!eof()) {
+				c = RX_BUFFER::read();
+				if (n < size - 1 && c != '\n' && c != '\r') {
+					putc(c);
+					buffer[n++] = c;
+				} else {
+					eol = true;
+				}
+			}
+		} while (!TIMEOUT::triggered() && !eol);
+		if (eol) {
 			buffer[n] = 0;
 			n = 0;
 			r = buffer;

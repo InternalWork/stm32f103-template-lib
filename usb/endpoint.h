@@ -10,7 +10,7 @@ struct EP_DEFAULT_HANDLER {
 		return btable_offset;
 	}
 
-	static void ctr(uint8_t ep, bool out) {
+	static bool ctr(uint8_t ep, bool out) {
 		uint8_t data[64];
 		uint16_t *pma_data, *d;
 		int16_t len;
@@ -23,6 +23,7 @@ struct EP_DEFAULT_HANDLER {
 				len -= 2;
 			}
 		}
+		return true;
 	}
 };
 
@@ -116,7 +117,7 @@ struct ENDPOINT {
 			*data = BUFFER::read() + ((i + 1) < count ? BUFFER::read() << 8 : 0);
 			data += 2;
 		}
-		return i;
+		return count;
 	}
 };
 
@@ -235,7 +236,7 @@ struct EP0_HANDLER_T {
 		EP::set_tx_rx_status(VALID, VALID);
 	}
 
-	static void ctr(uint8_t ep, bool out) {
+	static bool ctr(uint8_t ep, bool out) {
 		if (out) {
 			if (USB->EP0R & USB_EP0R_SETUP) {
 				handle_setup();
@@ -245,6 +246,7 @@ struct EP0_HANDLER_T {
 		} else {
 			handle_in();
 		}
+		return false;
 	}
 };
 
@@ -284,13 +286,15 @@ struct BUFFER_ENDPOINT {
 		return EP::init(btable_offset);
 	}
 
-	static void ctr(uint8_t ep, bool out) {
+	static bool ctr(uint8_t ep, bool out) {
+		bool exit_idle = false;
 		if (RX_SIZE > 0 && out) {
 			EP::clear_ctr_rx();
 			EP::set_rx_status(NAK);
 			EP::template read<RX_BUFFER>();
 			EP::reset_rx_count();
 			EP::set_tx_rx_status(NAK, VALID);
+			exit_idle = true;
 		} else if (TX_SIZE > 0) {
 			EP::clear_ctr_tx();
 			if (!TX_BUFFER::is_empty()) {
@@ -298,9 +302,11 @@ struct BUFFER_ENDPOINT {
 				EP::set_tx_rx_status(VALID, VALID);
 			} else {
 				transmitting = false;
+				exit_idle = true;
 				EP::set_tx_rx_status(NAK, VALID);
 			}
 		}
+		return exit_idle;
 	}
 
 	static void tx_start(void) {

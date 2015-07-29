@@ -43,11 +43,11 @@ typedef USB::CP2102_UART_T<PLL, USB_DISCONNECT, TX_BUFFER, RX_BUFFER> UART;
 extern "C" {
 
 void USB_HP_CAN1_TX_IRQHandler(void) {
-	UART::handle_hp_irq();
+	if (UART::handle_hp_irq()) exit_idle();
 }
 
 void USB_LP_CAN1_RX0_IRQHandler(void) {
-	UART::handle_lp_irq();
+	if (UART::handle_lp_irq()) exit_idle();
 }
 
 }
@@ -60,6 +60,7 @@ int main(void)
 	HSE::init();
 	PLL::init();
 	SYSCLK::init();
+	SYSTICK::init();
 	PORT_A::init();
 	PORT_B::init();
 	UART::init();
@@ -67,16 +68,20 @@ int main(void)
 	while (!UART::dtr() && !UART::rts()) {
 		enter_idle();
 	}
+	LED1::set_low();
 	SYSTICK::set_and_wait(100);
 	UART::puts("Echo test\n");
 	while(1) {
 		LED2::toggle();
 		printf<UART>("[%d] Enter a string:\n", count++);
 		while (!UART::gets(buffer, sizeof(buffer))) {
+			LED1::set_high();
 			enter_idle();
+			LED1::set_low();
 		}
+		UART::putc('\n');
 		UART::puts(buffer);
-		printf<UART>("Modem state: %x\n", UART::handshaking_state);
+		printf<UART>("\nModem state: %x\n", UART::handshaking_state);
 	}
 	return 0;
 }
