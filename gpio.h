@@ -71,8 +71,7 @@ struct GPIO_T {
 	static constexpr EDGE exti_edge = EXTI_EDGE;
 	static constexpr uint16_t bit_value = 1 << PIN;
 	static constexpr uint32_t initial_level = INITIAL_LEVEL << PIN;
-
-	static constexpr bool is_unused(void) { return false; }
+	static constexpr bool is_unused = false;
 
 	static void set_high(void) {
 		port->BSRR = bit_value;
@@ -170,8 +169,8 @@ struct PIN_UNUSED {
 	static constexpr EDGE edge = EDGE_RISING;
 	static constexpr uint16_t bit_value = 0;
 	static constexpr uint32_t initial_level = LOW;
+	static constexpr bool is_unused = true;
 
-	static constexpr bool is_unused(void) { return true; }
 	static constexpr bool is_high(void) { return false; }
 	static constexpr bool is_low(void) { return true; }
 	static void toggle(void) { }
