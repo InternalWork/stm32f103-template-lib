@@ -1,6 +1,5 @@
 CPU = STM32F103RB
 PRG = main
-BOARD ?= 
 
 CC = arm-none-eabi-gcc
 CXX = arm-none-eabi-g++
@@ -12,7 +11,7 @@ SIZE = arm-none-eabi-size
 
 INC = -I. -I../.. -I../../..
 
-CFLAGS = $(INC) -Os -g -mcpu=cortex-m3 -mthumb -nostartfiles -ffunction-sections -fdata-sections -DSTM32F10X_MD -D$(BOARD)
+CFLAGS = $(INC) -O0 -g -mcpu=cortex-m3 -mthumb -nostartfiles -ffunction-sections -fdata-sections -DSTM32F10X_MD
 CXXFLAGS = $(CFLAGS) -std=c++11 -fno-unwind-tables -fno-exceptions
 LDFLAGS = -nostdlib --gc-sections -L../.. -L../../../libaeabi-cortexm0 -T../../stm32f103xb.ld
 LIBS = -laeabi-cortexm0

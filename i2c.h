@@ -18,7 +18,9 @@ template<typename SYSCLK,
 	const int INSTANCE,
 	const bool MASTER = true,
 	const long FREQUENCY = 100000,
-	const bool CLOCK_STRETCHING = false>
+	const bool CLOCK_STRETCHING = false,
+	const uint8_t OWN_ADDRESS1 = 0,
+	const uint8_t OWN_ADDRESS2 = 0>
 struct T {
 	static uint8_t slave_addr;
 	static constexpr I2C_TypeDef *I2C = I2C_MODULE[INSTANCE - 1];
@@ -38,7 +40,6 @@ struct T {
 			RCC->APB1RSTR &= ~RCC_APB1RSTR_I2C2RST;
 			break;
 		}
-		I2C->CR1 |= I2C_CR1_ACK;
 		I2C->CR2 |= SYSCLK::pclk1 / 1000000;
 		if (FREQUENCY <= 100000) {
 			I2C->CCR = SYSCLK::pclk1 / (FREQUENCY * 2);
@@ -47,7 +48,13 @@ struct T {
 			I2C->CCR = SYSCLK::pclk1 / (FREQUENCY * 3) | I2C_CCR_FS;
 			I2C->TRISE = (SYSCLK::pclk1 / 1000000) * 3 / 10 + 1;
 		}
-		I2C->CR1 |= I2C_CR1_PE;
+		if (!MASTER) {
+			I2C->OAR1 = (OWN_ADDRESS1 << 1) | 0x4000;
+			if (OWN_ADDRESS2) {
+				I2C->OAR2 = (OWN_ADDRESS2 << 1) | I2C_OAR2_ENDUAL;
+			}
+		}
+		I2C->CR1 |= I2C_CR1_PE | I2C_CR1_ACK;
 	}
 
 	static void enable(void) {
@@ -178,10 +185,21 @@ struct T {
 	timeout:
 		return;
 	}
+
+	static bool addr_matched(void) {
+		return I2C->SR1 & I2C_SR1_ADDR;
+	}
+
+	static void clear_addr_matched(void) {
+		volatile uint32_t temp;
+		temp = I2C->SR1;
+		temp = I2C->SR2;
+	}
 };
 
-template<typename SYSCLK, const int INSTANCE, const bool MASTER, const long FREQUENCY, const bool CLOCK_STRETCHING>
-uint8_t T<SYSCLK, INSTANCE, MASTER, FREQUENCY, CLOCK_STRETCHING>::slave_addr;
+template<typename SYSCLK, const int INSTANCE, const bool MASTER, const long FREQUENCY, const bool CLOCK_STRETCHING,
+	const uint8_t OWN_ADDRESS1, const uint8_t OWN_ADDRESS2>
+uint8_t T<SYSCLK, INSTANCE, MASTER, FREQUENCY, CLOCK_STRETCHING, OWN_ADDRESS1, OWN_ADDRESS2>::slave_addr;
 
 }
 
