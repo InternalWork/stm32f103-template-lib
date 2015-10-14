@@ -59,6 +59,10 @@ struct RTC_T {
 	static constexpr int exti_syscfg(const int i) {
 		return 0;
 	}
+
+	static constexpr int exti_cr(const int i) {
+		return 0;
+	}
 };
 
 #endif
