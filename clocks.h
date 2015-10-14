@@ -120,14 +120,18 @@ struct SYSCLK_T {
 		static_assert(APB2_PRESCALER == 1, "APB2 prescaler setting not implemented");
 		switch (CLOCK_SOURCE::clock_source) {
 		case HSI_CLOCK_SOURCE:
+			break;
 		case HSE_CLOCK_SOURCE:
+			RCC->CFGR &= ~RCC_CFGR_SW;
+			RCC->CFGR |= RCC_CFGR_SW_HSE;
+			while ((RCC->CFGR & RCC_CFGR_SWS) != RCC_CFGR_SWS_HSE);
 		case LSI_CLOCK_SOURCE:
 		case LSE_CLOCK_SOURCE:
 			break;
 		case PLL_CLOCK_SOURCE:
 			RCC->CFGR &= ~RCC_CFGR_SW;
 			RCC->CFGR |= RCC_CFGR_SW_PLL;
-			while ((RCC->CFGR & RCC_CFGR_SWS) != RCC_CFGR_SWS_1);
+			while ((RCC->CFGR & RCC_CFGR_SWS) != RCC_CFGR_SWS_PLL);
 			break;
 		}
 
