@@ -104,98 +104,82 @@ struct SPI_T {
 	template<typename TIMEOUT = TIMEOUT_NEVER>
 	static uint8_t transfer(uint8_t data) {
 		uint8_t r;
-		spi->CR1 |= SPI_CR1_SPE;
 		while (!TIMEOUT::triggered() && !(spi->SR & SPI_SR_TXE));
 		spi->DR = data;
 		while (!TIMEOUT::triggered() && !(spi->SR & SPI_SR_RXNE));
 		r = spi->DR;
-		spi->CR1 &= ~SPI_CR1_SPE;
 		return r;
 	}
 
 	template<typename TIMEOUT = TIMEOUT_NEVER>
-	static void receive(uint8_t *rx_data, uint32_t count) {
-		uint8_t rx;
-		spi->CR1 |= SPI_CR1_RXONLY;
-		spi->CR1 |= SPI_CR1_SPE;
-		while (count > 0) {
-			while (!TIMEOUT::triggered() && !(spi->SR & SPI_SR_RXNE));
-			rx = spi->DR;
-			if (rx_data) {
-				*rx_data++ = rx;
+	static void transfer(uint8_t *tx_data, uint32_t count, uint8_t *rx_data = 0) {
+		if (POLLED) {
+			uint8_t rx;
+			spi->CR1 &= ~SPI_CR1_RXONLY;
+			while (count > 0) {
+				while (!TIMEOUT::triggered() && !(spi->SR & SPI_SR_TXE));
+				spi->DR = tx_data ? *tx_data++ : 0xff;
+				while (!TIMEOUT::triggered() && !(spi->SR & SPI_SR_RXNE));
+				rx = spi->DR;
+				if (rx_data) {
+					*rx_data++ = rx;
+				}
+				count--;
 			}
-			count--;
+		} else {
+			tx_buffer = tx_data;
+			tx_count = count;
+			rx_buffer = rx_data;
+			rx_count = count;
+			enable_irq();
+			while (!TIMEOUT::triggered() && rx_count > 0) {
+				enter_idle();
+			}
+			disable_irq();
 		}
-		spi->CR1 &= ~SPI_CR1_SPE;
 	}
 
-	template<typename TIMEOUT = TIMEOUT_NEVER>
-		static void transfer(uint8_t *tx_data, uint32_t count, uint8_t *rx_data = 0) {
-			if (POLLED) {
-				uint8_t rx;
-				spi->CR1 &= ~SPI_CR1_RXONLY;
-				spi->CR1 |= SPI_CR1_SPE;
-				while (count > 0) {
-					while (!TIMEOUT::triggered() && !(spi->SR & SPI_SR_TXE));
-					spi->DR = tx_data ? *tx_data++ : 0xff;
-					while (!TIMEOUT::triggered() && !(spi->SR & SPI_SR_RXNE));
-					rx = spi->DR;
-					if (rx_data) {
-						*rx_data++ = rx;
-					}
-					count--;
-				}
-				spi->CR1 &= ~SPI_CR1_SPE;
-			} else {
-				tx_buffer = tx_data;
-				tx_count = count;
-				rx_buffer = rx_data;
-				rx_count = count;
-				enable_irq();
-				while (!TIMEOUT::triggered() && rx_count > 0) {
-					enter_idle();
-				}
-				disable_irq();
-			}
-		}
-
 	static bool handle_irq(void) {
-		bool resume = false;
-		uint16_t status = spi->SR;
+		if (POLLED) {
+			return true;
+		} else {
+			bool resume = false;
+			uint16_t status = spi->SR;
 
-		if (status & SPI_SR_RXNE) {
-			uint16_t received_data = spi->DR;
-			if (rx_count > 0) {
-				if (rx_buffer) {
-					*rx_buffer = received_data;
-					rx_buffer++;
+			if (status & SPI_SR_RXNE) {
+				uint16_t received_data = spi->DR;
+				if (rx_count > 0) {
+					if (rx_buffer) {
+						*rx_buffer = received_data;
+						rx_buffer++;
+					}
+					rx_count--;
 				}
-				rx_count--;
+				if (rx_count == 0) {
+					spi->CR2 &= ~SPI_CR2_RXNEIE;
+					resume = true;
+				}
+				return resume;
 			}
-			if (rx_count == 0) {
-				spi->CR2 &= ~SPI_CR2_RXNEIE;
-				resume = true;
-			}
-			return resume;
-		}
-		if (status & SPI_SR_TXE) {
-			if (tx_count > 0) {
-				if (tx_buffer) {
-					spi->DR = *tx_buffer;
-					tx_buffer++;
+			if (status & SPI_SR_TXE) {
+				if (tx_count > 0) {
+					if (tx_buffer) {
+						spi->DR = *tx_buffer;
+						tx_buffer++;
+					} else {
+						spi->DR = 0xff;
+					}
+					tx_count--;
 				} else {
-					spi->DR = 0xff;
+					spi->CR2 &= ~SPI_CR2_TXEIE;
 				}
-				tx_count--;
-			} else {
-				spi->CR2 &= ~SPI_CR2_TXEIE;
+				return resume;
+			}
+			if (status & SPI_SR_OVR) {
+				while (1);
 			}
 			return resume;
 		}
-		if (status & SPI_SR_OVR) {
-			while (1);
-		}
-		return resume;
 	}
 
 };
