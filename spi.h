@@ -42,7 +42,8 @@ template<const SPI_INSTANCE SPI_N,
 	const int MODE = 3,
 	const int SPEED = 1000000,
 	const int DATA_LENGTH = 8,
-	const bool MSB = true>
+	const bool MSB = true,
+	const bool POLLED = true>
 struct SPI_T {
 	static constexpr SPI_TypeDef *spi = spi_addr[SPI_N];
 	volatile static int tx_count;
@@ -77,8 +78,10 @@ struct SPI_T {
 			spi->CR1 = spi->CR1;
 		}
 		spi->CR1 |= SPI_CR1_SPE;
-		NVIC_EnableIRQ(nvic_spi_irqn[SPI_N]);
-		NVIC_ClearPendingIRQ(nvic_spi_irqn[SPI_N]);
+		if (POLLED) {
+			NVIC_EnableIRQ(nvic_spi_irqn[SPI_N]);
+			NVIC_ClearPendingIRQ(nvic_spi_irqn[SPI_N]);
+		}
 	}
 
 	static void disable(void) {
@@ -87,11 +90,11 @@ struct SPI_T {
 	}
 
 	static void enable_irq(void) {
-		spi->CR2 |= SPI_CR2_RXNEIE | SPI_CR2_TXEIE;
+		spi->CR2 |= SPI_CR2_RXNEIE | SPI_CR2_TXEIE | SPI_CR2_ERRIE;
 	}
 
 	static void disable_irq(void) {
-		spi->CR2 &= ~(SPI_CR2_RXNEIE | SPI_CR2_TXEIE);
+		spi->CR2 &= ~(SPI_CR2_RXNEIE | SPI_CR2_TXEIE | SPI_CR2_ERRIE);
 	}
 
 	static bool busy(void) {
@@ -100,24 +103,61 @@ struct SPI_T {
 
 	template<typename TIMEOUT = TIMEOUT_NEVER>
 	static uint8_t transfer(uint8_t data) {
+		uint8_t r;
+		spi->CR1 |= SPI_CR1_SPE;
 		while (!TIMEOUT::triggered() && !(spi->SR & SPI_SR_TXE));
 		spi->DR = data;
 		while (!TIMEOUT::triggered() && !(spi->SR & SPI_SR_RXNE));
-		return spi->DR;
+		r = spi->DR;
+		spi->CR1 &= ~SPI_CR1_SPE;
+		return r;
 	}
 
 	template<typename TIMEOUT = TIMEOUT_NEVER>
-	static void transfer(uint8_t *tx_data, uint32_t count, uint8_t *rx_data = 0) {
-		tx_buffer = tx_data;
-		tx_count = count;
-		rx_buffer = rx_data;
-		rx_count = count;
-		enable_irq();
-		while (!TIMEOUT::triggered() && rx_count > 0) {
-			enter_idle();
+	static void receive(uint8_t *rx_data, uint32_t count) {
+		uint8_t rx;
+		spi->CR1 |= SPI_CR1_RXONLY;
+		spi->CR1 |= SPI_CR1_SPE;
+		while (count > 0) {
+			while (!TIMEOUT::triggered() && !(spi->SR & SPI_SR_RXNE));
+			rx = spi->DR;
+			if (rx_data) {
+				*rx_data++ = rx;
+			}
+			count--;
 		}
-		disable_irq();
+		spi->CR1 &= ~SPI_CR1_SPE;
 	}
+
+	template<typename TIMEOUT = TIMEOUT_NEVER>
+		static void transfer(uint8_t *tx_data, uint32_t count, uint8_t *rx_data = 0) {
+			if (POLLED) {
+				uint8_t rx;
+				spi->CR1 &= ~SPI_CR1_RXONLY;
+				spi->CR1 |= SPI_CR1_SPE;
+				while (count > 0) {
+					while (!TIMEOUT::triggered() && !(spi->SR & SPI_SR_TXE));
+					spi->DR = tx_data ? *tx_data++ : 0xff;
+					while (!TIMEOUT::triggered() && !(spi->SR & SPI_SR_RXNE));
+					rx = spi->DR;
+					if (rx_data) {
+						*rx_data++ = rx;
+					}
+					count--;
+				}
+				spi->CR1 &= ~SPI_CR1_SPE;
+			} else {
+				tx_buffer = tx_data;
+				tx_count = count;
+				rx_buffer = rx_data;
+				rx_count = count;
+				enable_irq();
+				while (!TIMEOUT::triggered() && rx_count > 0) {
+					enter_idle();
+				}
+				disable_irq();
+			}
+		}
 
 	static bool handle_irq(void) {
 		bool resume = false;
@@ -136,6 +176,7 @@ struct SPI_T {
 				spi->CR2 &= ~SPI_CR2_RXNEIE;
 				resume = true;
 			}
+			return resume;
 		}
 		if (status & SPI_SR_TXE) {
 			if (tx_count > 0) {
@@ -149,19 +190,23 @@ struct SPI_T {
 			} else {
 				spi->CR2 &= ~SPI_CR2_TXEIE;
 			}
+			return resume;
+		}
+		if (status & SPI_SR_OVR) {
+			while (1);
 		}
 		return resume;
 	}
 
 };
 
-template<const SPI_INSTANCE SPI_N, typename CLOCK, const bool MASTER, const int MODE, const int SPEED, const int DATA_LENGTH, const bool MSB>
-volatile int SPI_T<SPI_N, CLOCK, MASTER, MODE, SPEED, DATA_LENGTH, MSB>::tx_count;
-template<const SPI_INSTANCE SPI_N, typename CLOCK, const bool MASTER, const int MODE, const int SPEED, const int DATA_LENGTH, const bool MSB>
-volatile int SPI_T<SPI_N, CLOCK, MASTER, MODE, SPEED, DATA_LENGTH, MSB>::rx_count;
-template<const SPI_INSTANCE SPI_N, typename CLOCK, const bool MASTER, const int MODE, const int SPEED, const int DATA_LENGTH, const bool MSB>
-uint8_t *SPI_T<SPI_N, CLOCK, MASTER, MODE, SPEED, DATA_LENGTH, MSB>::rx_buffer;
-template<const SPI_INSTANCE SPI_N, typename CLOCK, const bool MASTER, const int MODE, const int SPEED, const int DATA_LENGTH, const bool MSB>
-uint8_t *SPI_T<SPI_N, CLOCK, MASTER, MODE, SPEED, DATA_LENGTH, MSB>::tx_buffer;
+template<const SPI_INSTANCE SPI_N, typename CLOCK, const bool MASTER, const int MODE, const int SPEED, const int DATA_LENGTH, const bool MSB, const bool POLLED>
+volatile int SPI_T<SPI_N, CLOCK, MASTER, MODE, SPEED, DATA_LENGTH, MSB, POLLED>::tx_count;
+template<const SPI_INSTANCE SPI_N, typename CLOCK, const bool MASTER, const int MODE, const int SPEED, const int DATA_LENGTH, const bool MSB, const bool POLLED>
+volatile int SPI_T<SPI_N, CLOCK, MASTER, MODE, SPEED, DATA_LENGTH, MSB, POLLED>::rx_count;
+template<const SPI_INSTANCE SPI_N, typename CLOCK, const bool MASTER, const int MODE, const int SPEED, const int DATA_LENGTH, const bool MSB, const bool POLLED>
+uint8_t *SPI_T<SPI_N, CLOCK, MASTER, MODE, SPEED, DATA_LENGTH, MSB, POLLED>::rx_buffer;
+template<const SPI_INSTANCE SPI_N, typename CLOCK, const bool MASTER, const int MODE, const int SPEED, const int DATA_LENGTH, const bool MSB, const bool POLLED>
+uint8_t *SPI_T<SPI_N, CLOCK, MASTER, MODE, SPEED, DATA_LENGTH, MSB, POLLED>::tx_buffer;
 
 #endif
