@@ -27,6 +27,7 @@ int strncmp(const char *s1, const char *s2, int n);
 #define ABS_DIFF(a, b) (a > b ? a - b : b - a)
 #define hex_dump_periph(OUTPUT, PERIPH) hex_dump<OUTPUT, uint32_t>((uint32_t *) PERIPH, sizeof(*PERIPH), #PERIPH)
 #define FROM_HEX(c) (c >= '0' && c <= '9' ? c - '0' : (c >= 'A' && c <= 'F' ? c - 'A' + 10 : (c >= 'a' && c <= 'f' ? c - 'a' + 10 : 0)))
+#define HEX_DIGIT(n) ((n) + ((n) < 10 ? '0' : 'A' - 10))
 
 #define MIN(a, b) ((a) < (b) ? (a) : (b))
 #define MAX(a, b) ((a) > (b) ? (a) : (b))

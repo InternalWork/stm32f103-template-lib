@@ -36,11 +36,12 @@ void GetRegistersFromStack(uint32_t *faultStackAddress, uint32_t _ipsr)
 }
 
 void Reset_Handler(void) __attribute__((naked));
-void HardFault_Handler(void) __attribute__((naked));
-void Default_Handler(void) __attribute((naked));
 void NMI_Handler(void) __attribute((naked));
+void HardFault_Handler(void) __attribute__((naked, weak, alias("HardFault_Diagnostic_Handler")));
+void HardFault_Diagnostic_Handler(void) __attribute__((naked));
+void Default_Handler(void) __attribute((naked));
 
-void HardFault_Handler(void)
+void HardFault_Diagnostic_Handler(void)
 {
 	__asm volatile
 		(
