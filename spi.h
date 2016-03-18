@@ -156,10 +156,9 @@ struct SPI_T {
 					rx_count--;
 				}
 				if (rx_count == 0) {
-					spi->CR2 &= ~SPI_CR2_RXNEIE;
+					spi->CR2 &= ~(SPI_CR2_RXNEIE | ~SPI_CR2_ERRIE);
 					resume = true;
 				}
-				return resume;
 			}
 			if (status & SPI_SR_TXE) {
 				if (tx_count > 0) {
@@ -173,10 +172,14 @@ struct SPI_T {
 				} else {
 					spi->CR2 &= ~SPI_CR2_TXEIE;
 				}
-				return resume;
 			}
 			if (status & SPI_SR_OVR) {
-				while (1);
+				if (tx_count == 0) {
+					volatile uint32_t tmp;
+					tmp = spi->DR;
+					tmp = spi->SR;
+				}
+				resume = true;
 			}
 			return resume;
 		}
