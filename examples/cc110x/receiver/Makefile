@@ -1,4 +1,4 @@
-TARGETS = sender.elf receiver.elf
+PRG = receiver
 
 ifeq ($(BOOTLOADER),y)
 	BL = _bootloader

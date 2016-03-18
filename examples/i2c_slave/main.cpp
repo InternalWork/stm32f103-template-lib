@@ -25,7 +25,7 @@ typedef GPIO_PORT_T<PB, LED1, SCL, SDA> PORT_B;
 typedef GPIO_PORT_T<PB, LED1, SCL_RESET, SDA_RESET> PORT_B_I2C_RESET;
 typedef GPIO_PORT_T<PC> PORT_C;
 #endif
-typedef I2C::T<SYSCLK, 2, false, 100000, false, 0x5e> I2C_DEV;
+typedef I2C::T<SYSCLK, 2, false, 100000, false, 0x5e, 0x6e> I2C_DEV;
 
 int main(void)
 {
@@ -50,7 +50,11 @@ int main(void)
 //				I2C_DEV::I2C->SR2;
 			}
 			if (sr1 & I2C_SR1_TXE) {
-				I2C_DEV::I2C->DR = 0x00;
+				switch (data) {
+				case 0x4f: I2C_DEV::I2C->DR = 0x05; break;
+				case 0x4d: I2C_DEV::I2C->DR = 0x07; break;
+				default: I2C_DEV::I2C->DR = 0x00; break;
+				}
 			}
 			if (I2C_DEV::I2C->SR1 & I2C_SR1_RXNE) {
 				data = I2C_DEV::I2C->DR;

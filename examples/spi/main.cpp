@@ -3,6 +3,7 @@
 #include <uart.h>
 #include <spi.h>
 #include <pwr.h>
+#include <exti.h>
 
 typedef HSE_OSC_T<> HSE;
 typedef PLL_T<HSE, 72000000> PLL;
@@ -68,8 +69,16 @@ typedef GPIO_PORT_T<PC> PORT_C;
 #endif
 typedef USART_T<USART_1, SYSCLK, 115200> UART;
 typedef SPI_T<SPI_1, SYSCLK, true, 0> SPI;
+typedef EXTI_T<BUTTON> EXT_INTERRUPT;
 
 extern "C" {
+
+void EXTI9_5_IRQHandler(void)
+{
+	EXT_INTERRUPT::handle_irq<5, 9>();
+	LED2::toggle();
+	exit_idle();
+}
 
 void USART1_IRQHandler(void)
 {
@@ -87,6 +96,9 @@ void SysTick_Handler(void) {
 
 }
 
+static uint8_t tx_buffer[32];
+static uint8_t rx_buffer[32];
+
 int main(void)
 {
 	HSE::init();
@@ -96,20 +108,31 @@ int main(void)
 	PORT_A::init();
 	PORT_B::init();
 	PORT_C::init();
+	EXT_INTERRUPT::init();
 	UART::init();
 	UART::puts("SPI test start\n");
 	SPI::init();
 	D0::set_high();
+	for (int i = 0; i < sizeof(tx_buffer); i++) tx_buffer[i] = i % 256;
 	while (1) {
+		uint8_t buffer[32];
 		LED1::toggle();
 		D0::set_low();
-		UART::puts("Transfer...\n");
+//		UART::puts("Transfer...\n");
 		CSN::set_low();
 //		SPI::transfer(0x44);
 //		SPI::transfer((uint8_t *) "\x55\xaa\x12\x34", 4);
-		SPI::transfer((uint8_t *) "\x40\x00", 2);
-//		CSN::set_high();
-		TIMEOUT::set_and_wait(500);
+//		SPI::transfer((uint8_t *) "\x40\x00", 2);
+//		SPI::receive(buffer, 2);
+		SPI::transfer(tx_buffer, sizeof(tx_buffer), rx_buffer);
+		for (int i = 0; i < sizeof(tx_buffer); i++) {
+			if (tx_buffer[i] != rx_buffer[i]) {
+				LED2::set_high();
+				while (1);
+			}
+		}
+		CSN::set_high();
+		TIMEOUT::set_and_wait(10);
 	}
 	return 0;
 }
