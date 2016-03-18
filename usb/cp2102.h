@@ -7,7 +7,6 @@
 namespace USB {
 
 template<typename PLL,
-	typename DISCONNECT_PIN,
 	typename TX_BUFFER,
 	typename RX_BUFFER>
 struct CP2102_UART_T {
@@ -15,7 +14,7 @@ struct CP2102_UART_T {
 	volatile static uint8_t handshaking_state;
 
 	static constexpr uint8_t device_descriptor[18] = {
-		0x12, 0x01, 0x10, 0x01, 0x00, 0x00, 0x00, 0x40, 0xC4, 0x10, 0x60, 0xEA, 0x00, 0x01, 0x01, 0x02,
+		0x12, 0x01, 0x10, 0x01, 0x00, 0x00, 0x00, 0x40, 0xc4, 0x10, 0x60, 0xea, 0x00, 0x01, 0x01, 0x02,
 		0x03, 0x01
 	};
 	static constexpr uint8_t config_descriptor[32] = {
@@ -75,6 +74,7 @@ struct CP2102_UART_T {
 			case 0x07: handshaking_state = handshaking_state & ~(packet->wValue >> 8) | (packet->wValue & 0x3); *length = 0; break;
 			case 0x08: *response_data = (const uint8_t *) &handshaking_state; *length = 1; break;
 			case 0x10: *response_data = (const uint8_t *) "\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00"; *length = 19; break;
+			case 0x11: NVIC_SystemReset(); break;
 			case 0xff: *response_data = (const uint8_t *) "\x02"; *length = 1; break;
 			case 0x0f: *response_data = (const uint8_t *) "\x42\x00\x00\x01\x01\x00\x00\x00\x00\x00\x00\x00\x00\x02\x00\x00\x00\x02\x00\x00\xC0\xC6\x2D\x00\x01\x00\x00\x00\x3F\x01\x00\x00\x7F\x00\x00\x00\xF0\xFF\x07\x10\x0F\x00\x07\x1F\x00\x02\x00\x00\x00\x02\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x33\x00\x2E\x00"; *length = 64; break;
 			case 0x03:
@@ -89,7 +89,7 @@ struct CP2102_UART_T {
 	}
 
 	typedef BUFFER_ENDPOINT<1, BULK, 1, 64, 64, NAK, VALID, TX_BUFFER, RX_BUFFER> DATA_ENDPOINT;
-	typedef T<PLL, DISCONNECT_PIN, get_descriptor, handle_request, default_irq_callback, DATA_ENDPOINT> USB_DRIVER;
+	typedef T<PLL, get_descriptor, handle_request, default_irq_callback, DATA_ENDPOINT> USB_DRIVER;
 
 	static void init(void) {
 		USB_DRIVER::init();
@@ -189,29 +189,29 @@ struct CP2102_UART_T {
 
 };
 
-template<typename PLL, typename DISCONNECT_PIN, typename TX_BUFFER, typename RX_BUFFER>
-volatile bool CP2102_UART_T<PLL, DISCONNECT_PIN, TX_BUFFER, RX_BUFFER>::initialized;
+template<typename PLL, typename TX_BUFFER, typename RX_BUFFER>
+volatile bool CP2102_UART_T<PLL, TX_BUFFER, RX_BUFFER>::initialized;
 
-template<typename PLL, typename DISCONNECT_PIN, typename TX_BUFFER, typename RX_BUFFER>
-volatile uint8_t CP2102_UART_T<PLL, DISCONNECT_PIN, TX_BUFFER, RX_BUFFER>::handshaking_state;
+template<typename PLL, typename TX_BUFFER, typename RX_BUFFER>
+volatile uint8_t CP2102_UART_T<PLL, TX_BUFFER, RX_BUFFER>::handshaking_state;
 
-template<typename PLL, typename DISCONNECT_PIN, typename TX_BUFFER, typename RX_BUFFER>
-constexpr uint8_t CP2102_UART_T<PLL, DISCONNECT_PIN, TX_BUFFER, RX_BUFFER>::device_descriptor[18];
+template<typename PLL, typename TX_BUFFER, typename RX_BUFFER>
+constexpr uint8_t CP2102_UART_T<PLL, TX_BUFFER, RX_BUFFER>::device_descriptor[18];
 
-template<typename PLL, typename DISCONNECT_PIN, typename TX_BUFFER, typename RX_BUFFER>
-constexpr uint8_t CP2102_UART_T<PLL, DISCONNECT_PIN, TX_BUFFER, RX_BUFFER>::config_descriptor[32];
+template<typename PLL, typename TX_BUFFER, typename RX_BUFFER>
+constexpr uint8_t CP2102_UART_T<PLL, TX_BUFFER, RX_BUFFER>::config_descriptor[32];
 
-template<typename PLL, typename DISCONNECT_PIN, typename TX_BUFFER, typename RX_BUFFER>
-constexpr uint8_t CP2102_UART_T<PLL, DISCONNECT_PIN, TX_BUFFER, RX_BUFFER>::manufacturer_string_descriptor[10];
+template<typename PLL, typename TX_BUFFER, typename RX_BUFFER>
+constexpr uint8_t CP2102_UART_T<PLL, TX_BUFFER, RX_BUFFER>::manufacturer_string_descriptor[10];
 
-template<typename PLL, typename DISCONNECT_PIN, typename TX_BUFFER, typename RX_BUFFER>
-constexpr uint8_t CP2102_UART_T<PLL, DISCONNECT_PIN, TX_BUFFER, RX_BUFFER>::product_string_descriptor[34];
+template<typename PLL, typename TX_BUFFER, typename RX_BUFFER>
+constexpr uint8_t CP2102_UART_T<PLL, TX_BUFFER, RX_BUFFER>::product_string_descriptor[34];
 
-template<typename PLL, typename DISCONNECT_PIN, typename TX_BUFFER, typename RX_BUFFER>
-constexpr uint8_t CP2102_UART_T<PLL, DISCONNECT_PIN, TX_BUFFER, RX_BUFFER>::serial_number_string_descriptor[10];
+template<typename PLL, typename TX_BUFFER, typename RX_BUFFER>
+constexpr uint8_t CP2102_UART_T<PLL, TX_BUFFER, RX_BUFFER>::serial_number_string_descriptor[10];
 
-template<typename PLL, typename DISCONNECT_PIN, typename TX_BUFFER, typename RX_BUFFER>
-constexpr uint8_t CP2102_UART_T<PLL, DISCONNECT_PIN, TX_BUFFER, RX_BUFFER>::languages_descriptor[4];
+template<typename PLL, typename TX_BUFFER, typename RX_BUFFER>
+constexpr uint8_t CP2102_UART_T<PLL, TX_BUFFER, RX_BUFFER>::languages_descriptor[4];
 
 }
 

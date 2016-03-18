@@ -17,7 +17,6 @@ static bool invalid_ep_ctr(uint8_t ep, bool out) {
 }
 
 template<typename PLL,
-	typename DISCONNECT_PIN,
 	DESCRIPTOR_CALLBACK get_descriptor_callback,
 	SETUP_CALLBACK handle_setup_callback,
 	IRQ_CALLBACK irq_callback,
@@ -47,8 +46,11 @@ struct T {
 	};
 
 	static void init(void) {
-		DISCONNECT_PIN::set_low();
 		static_assert(PLL::frequency == 72000000 || PLL::frequency == 48000000, "PLL frequency incorrect for USB");
+		GPIOA->CRH = GPIOA->CRH & 0xfff0ffff | 0x00010000;
+		GPIOA->BRR = 1 << 12;
+		for (volatile int i = 0; i < 1000; i++);
+		GPIOA->CRH |= 0x00040000;
 		if (PLL::frequency == 72000000) {
 			RCC->CFGR &= ~RCC_CFGR_USBPRE;
 		} else if (PLL::frequency == 48000000) {
@@ -146,13 +148,13 @@ struct T {
 	}
 };
 
-template<typename PLL, typename DISCONNECT_PIN,
+template<typename PLL,
 	DESCRIPTOR_CALLBACK get_descriptor_callback,
 	SETUP_CALLBACK handle_setup_callback,
 	IRQ_CALLBACK irq_callback,
 	typename EP1_HANDLER, typename EP2_HANDLER, typename EP3_HANDLER, typename EP4_HANDLER,
 	typename EP5_HANDLER, typename EP6_HANDLER, typename EP7_HANDLER>
-constexpr HANDLER_FUNCTION T<PLL, DISCONNECT_PIN, get_descriptor_callback, handle_setup_callback, irq_callback,
+constexpr HANDLER_FUNCTION T<PLL, get_descriptor_callback, handle_setup_callback, irq_callback,
 	  EP1_HANDLER, EP2_HANDLER, EP3_HANDLER, EP4_HANDLER, EP5_HANDLER, EP6_HANDLER, EP7_HANDLER>::ep_handler[8];
 
 }
